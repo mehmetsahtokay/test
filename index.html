@@ -1,448 +1,512 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" data-theme="light">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0f0f0f">
-<meta name="description" content="Offline çalışan yapılacaklar listesi">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#ffffff" id="themeColor">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="Yapılacaklar">
-<title>Yapılacaklar</title>
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Kafe">
+<title>Kafe Yönetim</title>
 <link rel="manifest" href="manifest.json">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 
-  :root {
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --surface2: #242424;
-    --border: #2e2e2e;
-    --text: #f0f0f0;
-    --muted: #888;
-    --accent: #c8f060;
-    --accent-dim: rgba(200,240,96,0.12);
-    --red: #ff5b5b;
-    --radius: 14px;
-  }
+:root{
+  --bg:#f5f5f0;
+  --surface:#ffffff;
+  --surface2:#f0ede8;
+  --border:#e0dbd4;
+  --text:#1a1614;
+  --muted:#8a7f76;
+  --accent:#c8520a;
+  --accent-bg:rgba(200,82,10,.08);
+  --green:#1e7e4a;
+  --green-bg:rgba(30,126,74,.1);
+  --red:#c0392b;
+  --red-bg:rgba(192,57,43,.1);
+  --blue:#1a6fa8;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 12px rgba(0,0,0,.06);
+  --r:12px;
+}
 
-  body {
-    font-family: 'Space Grotesk', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100dvh;
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 0 0 6rem;
-  }
+[data-theme="dark"]{
+  --bg:#141210;
+  --surface:#1e1c1a;
+  --surface2:#272422;
+  --border:#38332e;
+  --text:#f0ece6;
+  --muted:#8a7f76;
+  --accent:#e8722a;
+  --accent-bg:rgba(232,114,42,.1);
+  --green:#3ab068;
+  --green-bg:rgba(58,176,104,.12);
+  --red:#e05252;
+  --red-bg:rgba(224,82,82,.12);
+  --blue:#5b9bd5;
+  --shadow:0 1px 3px rgba(0,0,0,.3),0 4px 12px rgba(0,0,0,.2);
+}
 
-  header {
-    padding: 2rem 1.5rem 1rem;
-    position: sticky;
-    top: 0;
-    background: var(--bg);
-    z-index: 10;
-    border-bottom: 1px solid var(--border);
-  }
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;font-size:15px;transition:background .2s,color .2s;}
 
-  .header-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1.25rem;
-  }
+/* NAV */
+.nav{display:flex;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 1px 0 var(--border);}
+.nav-btn{flex:1;padding:12px 4px 8px;background:none;border:none;color:var(--muted);font-size:10px;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;border-bottom:2px solid transparent;transition:all .15s;}
+.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+.nav-icon{font-size:18px;line-height:1;}
+.theme-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:20px;padding:5px 10px;font-size:14px;cursor:pointer;}
 
-  h1 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-  }
+/* SCREENS */
+.screen{display:none;padding:1rem;padding-bottom:5rem;animation:fadeIn .18s;}
+.screen.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 
-  .badge {
-    background: var(--accent-dim);
-    color: var(--accent);
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 20px;
-    border: 1px solid rgba(200,240,96,0.25);
-  }
+/* MASA GRID */
+.masa-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.masa-kart{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:14px 8px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:var(--shadow);}
+.masa-kart:active{transform:scale(.95);}
+.masa-kart.dolu{border-color:var(--accent);background:var(--accent-bg);}
+.masa-no{font-size:17px;font-weight:700;margin-bottom:4px;color:var(--text);}
+.masa-kart.dolu .masa-no{color:var(--accent);}
+.masa-alt{font-size:11px;color:var(--muted);}
+.masa-kart.dolu .masa-alt{color:var(--accent);font-weight:600;}
+.masa-sure{font-size:10px;color:var(--muted);margin-top:2px;}
 
-  .input-row {
-    display: flex;
-    gap: 8px;
-  }
+/* PAGE HEADER */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+h2{font-size:18px;font-weight:700;color:var(--text);}
+h3{font-size:14px;font-weight:600;margin-bottom:.5rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
 
-  input[type="text"] {
-    flex: 1;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: inherit;
-    font-size: 0.95rem;
-    padding: 0.75rem 1rem;
-    border-radius: var(--radius);
-    outline: none;
-    transition: border-color 0.15s;
-  }
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end;backdrop-filter:blur(2px);}
+.overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-height:92dvh;overflow-y:auto;padding:1rem;}
+.modal-bar{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 1rem;}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:1rem;color:var(--text);}
 
-  input[type="text"]::placeholder { color: var(--muted); }
-  input[type="text"]:focus { border-color: var(--accent); }
+/* KATEGORİ */
+.kategori-scroll{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:1rem;padding-bottom:2px;}
+.kat-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:inherit;font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;cursor:pointer;white-space:nowrap;transition:all .15s;}
+.kat-btn.active{background:var(--accent-bg);border-color:var(--accent);color:var(--accent);}
 
-  .btn-add {
-    background: var(--accent);
-    color: #0f0f0f;
-    border: none;
-    border-radius: var(--radius);
-    width: 46px;
-    height: 46px;
-    font-size: 1.5rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    flex-shrink: 0;
-    transition: opacity 0.15s, transform 0.1s;
-  }
+/* ÜRÜN LİST */
+.urun-list{display:flex;flex-direction:column;gap:8px;}
+.urun-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:var(--shadow);}
+.urun-bilgi{flex:1;}
+.urun-ad{font-weight:600;font-size:14px;color:var(--text);}
+.urun-fiyat{color:var(--accent);font-size:13px;margin-top:2px;font-weight:500;}
+.btn-ekle{background:var(--accent);color:#fff;border:none;border-radius:8px;width:34px;height:34px;font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
+.btn-ekle:active{transform:scale(.88);}
 
-  .btn-add:hover { opacity: 0.85; }
-  .btn-add:active { transform: scale(0.95); }
+/* ADİSYON */
+.adisyon-list{display:flex;flex-direction:column;gap:6px;margin-bottom:1rem;}
+.adisyon-item{display:flex;align-items:center;gap:8px;background:var(--surface2);border-radius:10px;padding:10px 12px;}
+.adisyon-ad{flex:1;font-size:14px;color:var(--text);}
+.adisyon-adet{display:flex;align-items:center;gap:8px;}
+.adet-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);width:28px;height:28px;border-radius:6px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .1s;}
+.adet-btn:active{transform:scale(.88);}
+.adet-no{font-size:14px;font-weight:700;min-width:20px;text-align:center;color:var(--text);}
+.adisyon-fiyat{font-size:13px;color:var(--accent);font-weight:600;min-width:58px;text-align:right;}
 
-  .filters {
-    display: flex;
-    gap: 6px;
-    padding: 1rem 1.5rem 0;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
+/* TOPLAM */
+.toplam-kutu{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:1rem;}
+.toplam-satir{display:flex;justify-content:space-between;font-size:14px;padding:3px 0;color:var(--muted);}
+.toplam-satir span:last-child{color:var(--text);}
+.toplam-satir.buyuk{font-size:18px;font-weight:700;border-top:1px solid var(--border);margin-top:8px;padding-top:10px;}
+.toplam-satir.buyuk span{color:var(--accent);}
 
-  .filter-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-family: inherit;
-    font-size: 0.8rem;
-    font-weight: 500;
-    padding: 6px 14px;
-    border-radius: 20px;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.15s;
-  }
+/* BUTONLAR */
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:var(--r);font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:all .15s;margin-bottom:8px;}
+.btn:active{transform:scale(.98);}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-success{background:var(--green);color:#fff;}
+.btn-danger{background:var(--red);color:#fff;}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
 
-  .filter-btn.active {
-    background: var(--accent-dim);
-    border-color: rgba(200,240,96,0.4);
-    color: var(--accent);
-  }
+/* CİRO */
+.ciro-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem;}
+.mini-kart{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;box-shadow:var(--shadow);}
+.mini-label{font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:500;text-transform:uppercase;letter-spacing:.03em;}
+.mini-val{font-size:22px;font-weight:700;color:var(--text);}
+.mini-val.yesil{color:var(--green);}
+.mini-val.mavi{color:var(--blue);}
+.mini-val.turuncu{color:var(--accent);}
 
-  .list {
-    padding: 1rem 1.5rem 0;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
+.gecmis-list{display:flex;flex-direction:column;gap:8px;}
+.gecmis-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow);}
+.gecmis-sol{font-size:13px;color:var(--text);}
+.gecmis-zaman{font-size:11px;color:var(--muted);margin-top:3px;}
+.gecmis-tutar{font-size:16px;font-weight:700;color:var(--green);}
 
-  .todo-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    transition: opacity 0.2s, transform 0.2s;
-    animation: slideIn 0.2s ease;
-  }
+/* FORM */
+.urun-ekle-form{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:1rem;box-shadow:var(--shadow);}
+.form-row{margin-bottom:10px;}
+.form-label{font-size:12px;color:var(--muted);margin-bottom:5px;display:block;font-weight:500;}
+.form-input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:14px;padding:10px 12px;border-radius:8px;outline:none;transition:border-color .15s;}
+.form-input:focus{border-color:var(--accent);}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(-8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+.bos-mesaj{text-align:center;padding:3rem 1rem;color:var(--muted);}
+.bos-ikon{font-size:3rem;margin-bottom:.75rem;}
 
-  .todo-item.done { opacity: 0.45; }
-
-  .checkbox {
-    width: 22px;
-    height: 22px;
-    border-radius: 7px;
-    border: 2px solid var(--border);
-    flex-shrink: 0;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
-    background: transparent;
-  }
-
-  .todo-item.done .checkbox {
-    background: var(--accent);
-    border-color: var(--accent);
-  }
-
-  .checkbox::after {
-    content: '';
-    display: none;
-    width: 6px;
-    height: 10px;
-    border: 2px solid #0f0f0f;
-    border-top: none;
-    border-left: none;
-    transform: rotate(45deg) translateY(-1px);
-  }
-
-  .todo-item.done .checkbox::after { display: block; }
-
-  .todo-text {
-    flex: 1;
-    font-size: 0.95rem;
-    line-height: 1.4;
-    cursor: pointer;
-    word-break: break-word;
-  }
-
-  .todo-item.done .todo-text {
-    text-decoration: line-through;
-    color: var(--muted);
-  }
-
-  .btn-del {
-    background: none;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 1.1rem;
-    padding: 4px;
-    border-radius: 6px;
-    transition: color 0.15s, background 0.15s;
-    flex-shrink: 0;
-  }
-
-  .btn-del:hover { color: var(--red); background: rgba(255,91,91,0.1); }
-
-  .empty {
-    text-align: center;
-    padding: 3rem 1.5rem;
-    color: var(--muted);
-  }
-
-  .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
-  .empty p { font-size: 0.9rem; }
-
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    padding: 1rem 1.5rem 0;
-  }
-
-  .stat {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 0.75rem;
-    text-align: center;
-  }
-
-  .stat-num {
-    font-size: 1.4rem;
-    font-weight: 600;
-    color: var(--accent);
-    line-height: 1;
-  }
-
-  .stat-label {
-    font-size: 0.7rem;
-    color: var(--muted);
-    margin-top: 4px;
-  }
-
-  .offline-banner {
-    background: rgba(255,91,91,0.15);
-    border: 1px solid rgba(255,91,91,0.3);
-    color: var(--red);
-    text-align: center;
-    font-size: 0.8rem;
-    padding: 8px;
-    display: none;
-  }
-
-  .clear-btn {
-    display: block;
-    margin: 1rem 1.5rem 0;
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-family: inherit;
-    font-size: 0.8rem;
-    padding: 8px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .clear-btn:hover { border-color: var(--red); color: var(--red); }
-
-  .pwa-hint {
-    position: fixed;
-    bottom: 1.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 10px 18px;
-    font-size: 0.78rem;
-    color: var(--muted);
-    white-space: nowrap;
-    display: none;
-    z-index: 100;
-  }
+.divider{height:1px;background:var(--border);margin:1rem 0;}
 </style>
 </head>
 <body>
 
-<div class="offline-banner" id="offlineBanner">📡 İnternet yok — uygulama offline çalışıyor</div>
+<nav class="nav" style="position:relative;">
+  <button class="nav-btn active" onclick="goster('masalar',this)">
+    <span class="nav-icon">🪑</span>Masalar
+  </button>
+  <button class="nav-btn" onclick="goster('menu',this)">
+    <span class="nav-icon">☕</span>Menü
+  </button>
+  <button class="nav-btn" onclick="goster('ciro',this)">
+    <span class="nav-icon">📊</span>Ciro
+  </button>
+  <button class="nav-btn" onclick="goster('ayarlar',this)">
+    <span class="nav-icon">⚙️</span>Ayarlar
+  </button>
+  <button class="theme-toggle" onclick="temaToggle()" id="themeBtn">🌙</button>
+</nav>
 
-<header>
-  <div class="header-top">
-    <h1>Yapılacaklar</h1>
-    <span class="badge" id="countBadge">0 görev</span>
+<!-- MASALAR -->
+<div class="screen active" id="ekran-masalar">
+  <div class="page-header">
+    <h2>Masalar</h2>
+    <span style="font-size:13px;color:var(--muted)" id="masaOzet"></span>
   </div>
-  <div class="input-row">
-    <input type="text" id="todoInput" placeholder="Yeni görev ekle..." maxlength="120">
-    <button class="btn-add" onclick="addTodo()" aria-label="Ekle">+</button>
-  </div>
-</header>
-
-<div class="stats">
-  <div class="stat"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Toplam</div></div>
-  <div class="stat"><div class="stat-num" id="statDone">0</div><div class="stat-label">Tamamlandı</div></div>
-  <div class="stat"><div class="stat-num" id="statLeft">0</div><div class="stat-label">Kalan</div></div>
+  <div class="masa-grid" id="masaGrid"></div>
 </div>
 
-<div class="filters">
-  <button class="filter-btn active" onclick="setFilter('all', this)">Tümü</button>
-  <button class="filter-btn" onclick="setFilter('active', this)">Aktif</button>
-  <button class="filter-btn" onclick="setFilter('done', this)">Tamamlanan</button>
+<!-- MENÜ -->
+<div class="screen" id="ekran-menu">
+  <div class="page-header"><h2>Ürün Menüsü</h2></div>
+  <div class="kategori-scroll" id="menuKatFilter"></div>
+  <div class="urun-list" id="menuList"></div>
 </div>
 
-<div class="list" id="list"></div>
+<!-- CİRO -->
+<div class="screen" id="ekran-ciro">
+  <div class="page-header"><h2>Günlük Ciro</h2></div>
+  <div class="ciro-grid">
+    <div class="mini-kart"><div class="mini-label">Bugünkü Ciro</div><div class="mini-val yesil" id="statCiro">₺0</div></div>
+    <div class="mini-kart"><div class="mini-label">Ort. Adisyon</div><div class="mini-val turuncu" id="statOrt">₺0</div></div>
+    <div class="mini-kart"><div class="mini-label">Açık Masa</div><div class="mini-val" id="statAcik">0</div></div>
+    <div class="mini-kart"><div class="mini-label">Kapalı Masa</div><div class="mini-val mavi" id="statKapali">0</div></div>
+  </div>
+  <h3>Kapanan Masalar</h3>
+  <div class="gecmis-list" id="gecmisList"></div>
+</div>
 
-<button class="clear-btn" onclick="clearDone()">Tamamlananları temizle</button>
+<!-- AYARLAR -->
+<div class="screen" id="ekran-ayarlar">
+  <div class="page-header"><h2>Ürün Yönetimi</h2></div>
+  <div class="urun-ekle-form">
+    <h3 style="margin-bottom:.75rem;color:var(--text);">Yeni Ürün Ekle</h3>
+    <div class="form-row-2">
+      <div class="form-row">
+        <label class="form-label">Ürün Adı</label>
+        <input class="form-input" id="yeniAd" placeholder="Latte">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Fiyat (₺)</label>
+        <input class="form-input" id="yeniFiyat" type="number" placeholder="75">
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Kategori</label>
+      <input class="form-input" id="yeniKat" placeholder="Kahve">
+    </div>
+    <button class="btn btn-primary" onclick="urunEkle()">+ Ürün Ekle</button>
+  </div>
+  <h3>Mevcut Ürünler</h3>
+  <div class="urun-list" id="ayarUrunList"></div>
+  <div style="margin-top:1.5rem;">
+    <button class="btn btn-danger" onclick="sifirla()">🗑️ Tüm Verileri Sıfırla</button>
+  </div>
+</div>
 
-<div class="pwa-hint" id="pwaHint">📲 Ana ekrana ekleyebilirsin</div>
+<!-- MASA MODAL -->
+<div class="overlay" id="masaModal" onclick="modalKapat(event)">
+  <div class="modal">
+    <div class="modal-bar"></div>
+    <div class="modal-title" id="modalBaslik">Masa 1</div>
+
+    <div id="bolumBos">
+      <p style="color:var(--muted);font-size:14px;margin-bottom:1rem;">Bu masa şu an boş.</p>
+      <button class="btn btn-primary" onclick="masaAc()">Masayı Aç</button>
+      <button class="btn btn-ghost" onclick="kapat()">İptal</button>
+    </div>
+
+    <div id="bolumDolu" style="display:none">
+      <div class="kategori-scroll" id="siparisKatFilter"></div>
+      <div class="urun-list" id="siparisUrunList" style="margin-bottom:1rem;max-height:32vh;overflow-y:auto;"></div>
+      <div class="divider"></div>
+      <h3 style="margin-bottom:.75rem;color:var(--text);">Adisyon</h3>
+      <div class="adisyon-list" id="adisyonList"></div>
+      <div class="toplam-kutu" id="toplamKutu"></div>
+      <button class="btn btn-success" onclick="hesapKes()">✅ Hesabı Kapat</button>
+      <button class="btn btn-danger" onclick="masaKapat()">Masayı İptal Et</button>
+      <button class="btn btn-ghost" onclick="kapat()">Geri</button>
+    </div>
+  </div>
+</div>
 
 <script>
-let todos = JSON.parse(localStorage.getItem('todos') || '[]');
-let filter = 'all';
+let veri = JSON.parse(localStorage.getItem('kafe')||'null') || {
+  masaSayisi:12,masalar:{},
+  urunler:[
+    {id:1,ad:'Türk Kahvesi',fiyat:45,kat:'Kahve'},
+    {id:2,ad:'Latte',fiyat:75,kat:'Kahve'},
+    {id:3,ad:'Cappuccino',fiyat:75,kat:'Kahve'},
+    {id:4,ad:'Americano',fiyat:65,kat:'Kahve'},
+    {id:5,ad:'Espresso',fiyat:55,kat:'Kahve'},
+    {id:6,ad:'Çay',fiyat:30,kat:'Çay'},
+    {id:7,ad:'Bitki Çayı',fiyat:45,kat:'Çay'},
+    {id:8,ad:'Ayran',fiyat:35,kat:'Soğuk'},
+    {id:9,ad:'Limonata',fiyat:55,kat:'Soğuk'},
+    {id:10,ad:'Su',fiyat:20,kat:'Soğuk'},
+    {id:11,ad:'Cheesecake',fiyat:85,kat:'Yiyecek'},
+    {id:12,ad:'Tost',fiyat:65,kat:'Yiyecek'},
+    {id:13,ad:'Brownie',fiyat:70,kat:'Yiyecek'},
+  ],
+  gecmis:[],nextId:14
+};
 
-function save() {
-  localStorage.setItem('todos', JSON.stringify(todos));
+let aktifMasa=null, seciliKat='Tümü', menuKat='Tümü';
+let tema = localStorage.getItem('tema')||'light';
+
+function kaydet(){ localStorage.setItem('kafe',JSON.stringify(veri)); }
+
+function temaUygula(){
+  document.documentElement.setAttribute('data-theme',tema);
+  document.getElementById('themeBtn').textContent = tema==='light'?'🌙':'☀️';
+  document.getElementById('themeColor').content = tema==='light'?'#ffffff':'#141210';
 }
 
-function render() {
-  const list = document.getElementById('list');
-  const filtered = todos.filter(t =>
-    filter === 'all' ? true : filter === 'done' ? t.done : !t.done
-  );
-
-  if (filtered.length === 0) {
-    list.innerHTML = `<div class="empty">
-      <div class="empty-icon">${filter === 'done' ? '🎉' : '📋'}</div>
-      <p>${filter === 'done' ? 'Henüz tamamlanan görev yok' : 'Liste boş, bir şeyler ekle!'}</p>
-    </div>`;
-  } else {
-    list.innerHTML = filtered.map(t => `
-      <div class="todo-item ${t.done ? 'done' : ''}" id="item-${t.id}">
-        <div class="checkbox" onclick="toggle('${t.id}')" role="checkbox" aria-checked="${t.done}" tabindex="0"></div>
-        <span class="todo-text" onclick="toggle('${t.id}')">${escHtml(t.text)}</span>
-        <button class="btn-del" onclick="remove('${t.id}')" aria-label="Sil">✕</button>
-      </div>
-    `).join('');
-  }
-
-  const total = todos.length;
-  const done = todos.filter(t => t.done).length;
-  const left = total - done;
-
-  document.getElementById('statTotal').textContent = total;
-  document.getElementById('statDone').textContent = done;
-  document.getElementById('statLeft').textContent = left;
-  document.getElementById('countBadge').textContent = left + ' görev';
+function temaToggle(){
+  tema = tema==='light'?'dark':'light';
+  localStorage.setItem('tema',tema);
+  temaUygula();
 }
 
-function escHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function addTodo() {
-  const input = document.getElementById('todoInput');
-  const text = input.value.trim();
-  if (!text) return;
-  todos.unshift({ id: Date.now().toString(), text, done: false });
-  save();
-  render();
-  input.value = '';
-  input.focus();
-}
-
-function toggle(id) {
-  const t = todos.find(t => t.id === id);
-  if (t) { t.done = !t.done; save(); render(); }
-}
-
-function remove(id) {
-  todos = todos.filter(t => t.id !== id);
-  save();
-  render();
-}
-
-function setFilter(f, btn) {
-  filter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+function goster(id,btn){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('ekran-'+id).classList.add('active');
   btn.classList.add('active');
-  render();
+  if(id==='masalar') renderMasalar();
+  if(id==='menu') renderMenu();
+  if(id==='ciro') renderCiro();
+  if(id==='ayarlar') renderAyarlar();
 }
 
-function clearDone() {
-  todos = todos.filter(t => !t.done);
-  save();
-  render();
+function renderMasalar(){
+  const g=document.getElementById('masaGrid');
+  g.innerHTML='';
+  let doluSayisi=0;
+  for(let i=1;i<=veri.masaSayisi;i++){
+    const m=veri.masalar[i];
+    const dolu=m&&m.acik;
+    if(dolu) doluSayisi++;
+    const div=document.createElement('div');
+    div.className='masa-kart'+(dolu?' dolu':'');
+    div.onclick=()=>masaModalAc(i);
+    let sure='';
+    if(dolu&&m.acilisZamani){
+      const dk=Math.floor((Date.now()-m.acilisZamani)/60000);
+      sure=dk<60?dk+'dk':Math.floor(dk/60)+'sa '+dk%60+'dk';
+    }
+    div.innerHTML=`<div class="masa-no">M${i}</div><div class="masa-alt">${dolu?'₺'+toplamHesapla(i):'Boş'}</div>${dolu?`<div class="masa-sure">${sure}</div>`:''}`;
+    g.appendChild(div);
+  }
+  document.getElementById('masaOzet').textContent=doluSayisi?doluSayisi+' dolu':'Tümü boş';
 }
 
-document.getElementById('todoInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') addTodo();
-});
-
-window.addEventListener('offline', () => {
-  document.getElementById('offlineBanner').style.display = 'block';
-});
-
-window.addEventListener('online', () => {
-  document.getElementById('offlineBanner').style.display = 'none';
-});
-
-if (!navigator.onLine) {
-  document.getElementById('offlineBanner').style.display = 'block';
+function toplamHesapla(masaNo){
+  const m=veri.masalar[masaNo];
+  if(!m||!m.siparisler) return 0;
+  return m.siparisler.reduce((t,s)=>t+s.fiyat*s.adet,0);
 }
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(console.error);
+function masaModalAc(no){
+  aktifMasa=no;
+  const m=veri.masalar[no];
+  document.getElementById('modalBaslik').textContent='Masa '+no;
+  const dolu=m&&m.acik;
+  document.getElementById('bolumBos').style.display=dolu?'none':'block';
+  document.getElementById('bolumDolu').style.display=dolu?'block':'none';
+  if(dolu) renderSiparisEkrani();
+  document.getElementById('masaModal').classList.add('open');
 }
 
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  const hint = document.getElementById('pwaHint');
-  hint.style.display = 'block';
-  setTimeout(() => hint.style.display = 'none', 5000);
-});
+function modalKapat(e){
+  if(e.target===document.getElementById('masaModal')) kapat();
+}
 
-render();
+function kapat(){
+  document.getElementById('masaModal').classList.remove('open');
+  aktifMasa=null;
+  renderMasalar();
+}
+
+function masaAc(){
+  veri.masalar[aktifMasa]={acik:true,acilisZamani:Date.now(),siparisler:[]};
+  kaydet();
+  document.getElementById('bolumBos').style.display='none';
+  document.getElementById('bolumDolu').style.display='block';
+  renderSiparisEkrani();
+}
+
+function kategoriler(){ return ['Tümü',...new Set(veri.urunler.map(u=>u.kat))]; }
+
+function renderSiparisEkrani(){
+  document.getElementById('siparisKatFilter').innerHTML=kategoriler().map(k=>
+    `<button class="kat-btn${seciliKat===k?' active':''}" onclick="katSec('${k}')">${k}</button>`
+  ).join('');
+  const filtered=seciliKat==='Tümü'?veri.urunler:veri.urunler.filter(u=>u.kat===seciliKat);
+  document.getElementById('siparisUrunList').innerHTML=filtered.map(u=>`
+    <div class="urun-item">
+      <div class="urun-bilgi"><div class="urun-ad">${u.ad}</div><div class="urun-fiyat">₺${u.fiyat}</div></div>
+      <button class="btn-ekle" onclick="siparisEkle(${u.id})">+</button>
+    </div>`).join('');
+  renderAdisyon();
+}
+
+function katSec(k){ seciliKat=k; renderSiparisEkrani(); }
+
+function siparisEkle(uid){
+  const u=veri.urunler.find(x=>x.id===uid);
+  if(!u) return;
+  const m=veri.masalar[aktifMasa];
+  const mv=m.siparisler.find(s=>s.urunId===uid);
+  if(mv) mv.adet++;
+  else m.siparisler.push({urunId:uid,ad:u.ad,fiyat:u.fiyat,adet:1});
+  kaydet(); renderAdisyon();
+}
+
+function adetDegistir(uid,delta){
+  const m=veri.masalar[aktifMasa];
+  const s=m.siparisler.find(x=>x.urunId===uid);
+  if(!s) return;
+  s.adet+=delta;
+  if(s.adet<=0) m.siparisler=m.siparisler.filter(x=>x.urunId!==uid);
+  kaydet(); renderAdisyon();
+}
+
+function renderAdisyon(){
+  const m=veri.masalar[aktifMasa];
+  const al=document.getElementById('adisyonList');
+  if(!m.siparisler.length){
+    al.innerHTML='<div style="color:var(--muted);font-size:13px;padding:8px 0">Henüz sipariş eklenmedi</div>';
+  } else {
+    al.innerHTML=m.siparisler.map(s=>`
+      <div class="adisyon-item">
+        <span class="adisyon-ad">${s.ad}</span>
+        <div class="adisyon-adet">
+          <button class="adet-btn" onclick="adetDegistir(${s.urunId},-1)">−</button>
+          <span class="adet-no">${s.adet}</span>
+          <button class="adet-btn" onclick="adetDegistir(${s.urunId},1)">+</button>
+        </div>
+        <span class="adisyon-fiyat">₺${s.fiyat*s.adet}</span>
+      </div>`).join('');
+  }
+  const toplam=toplamHesapla(aktifMasa);
+  const kdv=Math.round(toplam*0.1);
+  document.getElementById('toplamKutu').innerHTML=`
+    <div class="toplam-satir"><span>Ara Toplam</span><span>₺${toplam}</span></div>
+    <div class="toplam-satir"><span>KDV (%10)</span><span>₺${kdv}</span></div>
+    <div class="toplam-satir buyuk"><span>Toplam</span><span>₺${toplam+kdv}</span></div>`;
+}
+
+function hesapKes(){
+  const m=veri.masalar[aktifMasa];
+  const toplam=toplamHesapla(aktifMasa);
+  if(!toplam){alert('Sipariş yok!');return;}
+  veri.gecmis.unshift({masaNo:aktifMasa,siparisler:[...m.siparisler],toplam:toplam+Math.round(toplam*0.1),zaman:Date.now()});
+  delete veri.masalar[aktifMasa];
+  kaydet(); kapat();
+}
+
+function masaKapat(){
+  if(!confirm('Masayı iptal etmek istediğine emin misin?')) return;
+  delete veri.masalar[aktifMasa];
+  kaydet(); kapat();
+}
+
+function renderMenu(){
+  document.getElementById('menuKatFilter').innerHTML=kategoriler().map(k=>
+    `<button class="kat-btn${menuKat===k?' active':''}" onclick="menuKatSec('${k}')">${k}</button>`
+  ).join('');
+  const filtered=menuKat==='Tümü'?veri.urunler:veri.urunler.filter(u=>u.kat===menuKat);
+  document.getElementById('menuList').innerHTML=filtered.map(u=>`
+    <div class="urun-item">
+      <div class="urun-bilgi"><div class="urun-ad">${u.ad}</div><div class="urun-fiyat">₺${u.fiyat} · ${u.kat}</div></div>
+    </div>`).join('');
+}
+
+function menuKatSec(k){ menuKat=k; renderMenu(); }
+
+function renderCiro(){
+  const bugun=new Date(); bugun.setHours(0,0,0,0);
+  const bg=veri.gecmis.filter(g=>g.zaman>=bugun.getTime());
+  const ciro=bg.reduce((t,g)=>t+g.toplam,0);
+  const acik=Object.values(veri.masalar).filter(m=>m&&m.acik).length;
+  document.getElementById('statCiro').textContent='₺'+ciro;
+  document.getElementById('statKapali').textContent=bg.length;
+  document.getElementById('statAcik').textContent=acik;
+  document.getElementById('statOrt').textContent=bg.length?'₺'+Math.round(ciro/bg.length):'₺0';
+  const gl=document.getElementById('gecmisList');
+  if(!bg.length){
+    gl.innerHTML='<div class="bos-mesaj"><div class="bos-ikon">📭</div><p>Bugün henüz kapanan masa yok</p></div>';
+    return;
+  }
+  gl.innerHTML=bg.map(g=>{
+    const t=new Date(g.zaman);
+    const saat=t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');
+    return `<div class="gecmis-item">
+      <div class="gecmis-sol"><div>Masa ${g.masaNo} · ${g.siparisler.length} kalem</div><div class="gecmis-zaman">${saat}</div></div>
+      <div class="gecmis-tutar">₺${g.toplam}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderAyarlar(){
+  document.getElementById('ayarUrunList').innerHTML=veri.urunler.map(u=>`
+    <div class="urun-item">
+      <div class="urun-bilgi"><div class="urun-ad">${u.ad}</div><div class="urun-fiyat">₺${u.fiyat} · ${u.kat}</div></div>
+      <button class="btn-ekle" style="background:var(--red);" onclick="urunSil(${u.id})">✕</button>
+    </div>`).join('');
+}
+
+function urunEkle(){
+  const ad=document.getElementById('yeniAd').value.trim();
+  const fiyat=parseInt(document.getElementById('yeniFiyat').value);
+  const kat=document.getElementById('yeniKat').value.trim()||'Diğer';
+  if(!ad||!fiyat){alert('Ad ve fiyat zorunlu!');return;}
+  veri.urunler.push({id:veri.nextId++,ad,fiyat,kat});
+  kaydet();
+  document.getElementById('yeniAd').value='';
+  document.getElementById('yeniFiyat').value='';
+  document.getElementById('yeniKat').value='';
+  renderAyarlar();
+}
+
+function urunSil(id){
+  if(!confirm('Ürün silinsin mi?')) return;
+  veri.urunler=veri.urunler.filter(u=>u.id!==id);
+  kaydet(); renderAyarlar();
+}
+
+function sifirla(){
+  if(!confirm('TÜM VERİLER SİLİNECEK! Emin misin?')) return;
+  localStorage.removeItem('kafe'); location.reload();
+}
+
+temaUygula();
+renderMasalar();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>
