@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f0f0f">
+<meta name="description" content="Offline çalışan yapılacaklar listesi">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Yapılacaklar">
+<title>Yapılacaklar</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --border: #2e2e2e;
+    --text: #f0f0f0;
+    --muted: #888;
+    --accent: #c8f060;
+    --accent-dim: rgba(200,240,96,0.12);
+    --red: #ff5b5b;
+    --radius: 14px;
+  }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 0 6rem;
+  }
+
+  header {
+    padding: 2rem 1.5rem 1rem;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 10;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .badge {
+    background: var(--accent-dim);
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(200,240,96,0.25);
+  }
+
+  .input-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  input[type="text"] {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.95rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  input[type="text"]::placeholder { color: var(--muted); }
+  input[type="text"]:focus { border-color: var(--accent); }
+
+  .btn-add {
+    background: var(--accent);
+    color: #0f0f0f;
+    border: none;
+    border-radius: var(--radius);
+    width: 46px;
+    height: 46px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    flex-shrink: 0;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+
+  .btn-add:hover { opacity: 0.85; }
+  .btn-add:active { transform: scale(0.95); }
+
+  .filters {
+    display: flex;
+    gap: 6px;
+    padding: 1rem 1.5rem 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .filter-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+
+  .filter-btn.active {
+    background: var(--accent-dim);
+    border-color: rgba(200,240,96,0.4);
+    color: var(--accent);
+  }
+
+  .list {
+    padding: 1rem 1.5rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .todo-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: opacity 0.2s, transform 0.2s;
+    animation: slideIn 0.2s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .todo-item.done { opacity: 0.45; }
+
+  .checkbox {
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    background: transparent;
+  }
+
+  .todo-item.done .checkbox {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .checkbox::after {
+    content: '';
+    display: none;
+    width: 6px;
+    height: 10px;
+    border: 2px solid #0f0f0f;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg) translateY(-1px);
+  }
+
+  .todo-item.done .checkbox::after { display: block; }
+
+  .todo-text {
+    flex: 1;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    cursor: pointer;
+    word-break: break-word;
+  }
+
+  .todo-item.done .todo-text {
+    text-decoration: line-through;
+    color: var(--muted);
+  }
+
+  .btn-del {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 4px;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+    flex-shrink: 0;
+  }
+
+  .btn-del:hover { color: var(--red); background: rgba(255,91,91,0.1); }
+
+  .empty {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--muted);
+  }
+
+  .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+  .empty p { font-size: 0.9rem; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 1rem 1.5rem 0;
+  }
+
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .offline-banner {
+    background: rgba(255,91,91,0.15);
+    border: 1px solid rgba(255,91,91,0.3);
+    color: var(--red);
+    text-align: center;
+    font-size: 0.8rem;
+    padding: 8px;
+    display: none;
+  }
+
+  .clear-btn {
+    display: block;
+    margin: 1rem 1.5rem 0;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 0.8rem;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .clear-btn:hover { border-color: var(--red); color: var(--red); }
+
+  .pwa-hint {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 18px;
+    font-size: 0.78rem;
+    color: var(--muted);
+    white-space: nowrap;
+    display: none;
+    z-index: 100;
+  }
+</style>
+</head>
+<body>
+
+<div class="offline-banner" id="offlineBanner">📡 İnternet yok — uygulama offline çalışıyor</div>
+
+<header>
+  <div class="header-top">
+    <h1>Yapılacaklar</h1>
+    <span class="badge" id="countBadge">0 görev</span>
+  </div>
+  <div class="input-row">
+    <input type="text" id="todoInput" placeholder="Yeni görev ekle..." maxlength="120">
+    <button class="btn-add" onclick="addTodo()" aria-label="Ekle">+</button>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Toplam</div></div>
+  <div class="stat"><div class="stat-num" id="statDone">0</div><div class="stat-label">Tamamlandı</div></div>
+  <div class="stat"><div class="stat-num" id="statLeft">0</div><div class="stat-label">Kalan</div></div>
+</div>
+
+<div class="filters">
+  <button class="filter-btn active" onclick="setFilter('all', this)">Tümü</button>
+  <button class="filter-btn" onclick="setFilter('active', this)">Aktif</button>
+  <button class="filter-btn" onclick="setFilter('done', this)">Tamamlanan</button>
+</div>
+
+<div class="list" id="list"></div>
+
+<button class="clear-btn" onclick="clearDone()">Tamamlananları temizle</button>
+
+<div class="pwa-hint" id="pwaHint">📲 Ana ekrana ekleyebilirsin</div>
+
+<script>
+let todos = JSON.parse(localStorage.getItem('todos') || '[]');
+let filter = 'all';
+
+function save() {
+  localStorage.setItem('todos', JSON.stringify(todos));
+}
+
+function render() {
+  const list = document.getElementById('list');
+  const filtered = todos.filter(t =>
+    filter === 'all' ? true : filter === 'done' ? t.done : !t.done
+  );
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty">
+      <div class="empty-icon">${filter === 'done' ? '🎉' : '📋'}</div>
+      <p>${filter === 'done' ? 'Henüz tamamlanan görev yok' : 'Liste boş, bir şeyler ekle!'}</p>
+    </div>`;
+  } else {
+    list.innerHTML = filtered.map(t => `
+      <div class="todo-item ${t.done ? 'done' : ''}" id="item-${t.id}">
+        <div class="checkbox" onclick="toggle('${t.id}')" role="checkbox" aria-checked="${t.done}" tabindex="0"></div>
+        <span class="todo-text" onclick="toggle('${t.id}')">${escHtml(t.text)}</span>
+        <button class="btn-del" onclick="remove('${t.id}')" aria-label="Sil">✕</button>
+      </div>
+    `).join('');
+  }
+
+  const total = todos.length;
+  const done = todos.filter(t => t.done).length;
+  const left = total - done;
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statDone').textContent = done;
+  document.getElementById('statLeft').textContent = left;
+  document.getElementById('countBadge').textContent = left + ' görev';
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function addTodo() {
+  const input = document.getElementById('todoInput');
+  const text = input.value.trim();
+  if (!text) return;
+  todos.unshift({ id: Date.now().toString(), text, done: false });
+  save();
+  render();
+  input.value = '';
+  input.focus();
+}
+
+function toggle(id) {
+  const t = todos.find(t => t.id === id);
+  if (t) { t.done = !t.done; save(); render(); }
+}
+
+function remove(id) {
+  todos = todos.filter(t => t.id !== id);
+  save();
+  render();
+}
+
+function setFilter(f, btn) {
+  filter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function clearDone() {
+  todos = todos.filter(t => !t.done);
+  save();
+  render();
+}
+
+document.getElementById('todoInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addTodo();
+});
+
+window.addEventListener('offline', () => {
+  document.getElementById('offlineBanner').style.display = 'block';
+});
+
+window.addEventListener('online', () => {
+  document.getElementById('offlineBanner').style.display = 'none';
+});
+
+if (!navigator.onLine) {
+  document.getElementById('offlineBanner').style.display = 'block';
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(console.error);
+}
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  const hint = document.getElementById('pwaHint');
+  hint.style.display = 'block';
+  setTimeout(() => hint.style.display = 'none', 5000);
+});
+
+render();
+</script>
+</body>
+</html>
